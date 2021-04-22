@@ -1,12 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import firebase from 'firebase';
 import image from '../images/about-me.jpg';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
-function ChatInput({ channelName, channelId }) {
+function ChatInput({ channelName, channelId, chatRef }) {
   const [input, setInput] = useState('');
+  const [user] = useAuthState(auth);
 
   const sendMessage = e => {
     e.preventDefault();
@@ -21,9 +23,13 @@ function ChatInput({ channelName, channelId }) {
       .add({
         message: input,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        user: 'David De Castro',
-        userImage: { image }
+        user: user.displayName,
+        userImage: user.photoURL
       });
+
+    chatRef?.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
 
     setInput('');
   };
